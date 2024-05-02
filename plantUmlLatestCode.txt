@@ -1,0 +1,154 @@
+@startuml
+interface UserActions {
+    + showCredentialsAndPrivileges(): void
+}
+
+class User {
+    - username: String
+    - id: int
+    - credit: int
+    - bookings: List<Booking>
+    + User(name: String)
+    + viewBookings(): boolean
+    + getUserName(): String
+    + addBooking(booking: Booking): void
+    + getBooking(bookingId: int): Booking
+    + removeBooking(booking: Booking): void
+    + addCredit(credit: int): void
+    + getCredit(): int
+    + reduceCredit(credit: int): void
+    + setCredit(credit: int): void
+    + getId(): int
+    + static findUser(name: String): User
+    + static getUser(id: int): User
+}
+
+class Admin {
+    + Admin(name: String)
+    + addCity(city: String): void
+    + removeCity(city: String): void
+    + setCities(cities: List<String>): void
+    + showAllUsers(): void
+    + assignSourceDestinationTimeToBus(): void
+    + createBus(): void
+    + modifyBus(busId: int, noOfSeats: int, noOfWaitingList: int): void
+    + deleteBus(busId: int): void
+    + setCreditForCancellationOnSameDay(credit: int): void
+    + setCreditForCancellationBefore(credit: int): void
+    + showPrivileges(): void
+    + static findAdmin(name: String): Admin
+}
+
+class Booking {
+    - id: int
+    - busId: int
+    - userId: int
+    - date: String
+    - source: String
+    - destination: String
+    - startTime: String
+    - endTime: String
+    - day: String
+    - noOfConfirmedSeats: int
+    - noOfWaitingListSeats: int
+    + Booking(userId: int, busId: int, date: String, noOfConfirmedSeats: int, noOfWaitingListSeats: int, source: String, destination: String, startTime: String, endTime: String)
+    + showBooking(): void
+    + viewDetails(): void
+    + toString(): String
+    + getId(): int
+    + getSource(): String
+    + getDestination(): String
+    + getBus(): Bus
+    + getUser(): User
+    + getDate(): String
+    + getStartTime(): String
+    + getEndTime(): String
+    + getUserId(): int
+    + setDate(newDate: String): void
+    + getNoOfSeats(): int
+    + getNoOfConfirmedSeats(): int
+    + setNoOfConfirmedSeats(i: int): void
+    + getNoOfWaitingListSeats(): int
+    + setNoOfWaitingListSeats(i: int): void
+    + static book(userId: int, changeDate: boolean): boolean
+    + static book(userId: int, busId: int, source: String, destination: String, date: String, noOfSeats: int, startTime: String, schedule: Schedule_SourceDestinationTimeDaysPair, changeDate: boolean): boolean
+    + static showAvailableCities(): void
+    + static cancelBooking(userId: Integer, changeDate: boolean): void
+    + static cancelBooking(userId: Integer, bookingId: int, numberOfSeatsToCancel: int, changeDate: boolean): void
+    + static requestChangeDate(userId: Integer): void
+}
+
+class Bus {
+    - id: int
+    - bookedSeats: HashMap<DateSchedulePair, Integer>
+    - numberOfWaitingList: HashMap<DateSchedulePair, Integer>
+    - totalSeats: int
+    - totalNumberOfWaitingList: int
+    - schedules: List<Schedule_SourceDestinationTimeDaysPair>
+    + Bus(noOfSeats: int, noOfWaitingList: int)
+    + getAvailableSeats(dateSchedulePair: DateSchedulePair): int
+    + getTotalAvailableSeats(dateSchedulePair: DateSchedulePair): int
+    + setTotalSeats(i: int): void
+    + setBookedSeats(dateSchedulePair: DateSchedulePair, i: int): void
+    + isWaitingListAvailable(dateSchedulePair: DateSchedulePair): boolean
+    + showSchedule(): void
+    + getSchedule(startTime: String, date: String): Schedule_SourceDestinationTimeDaysPair
+    + addSchedule(source: String, destination: String, startTime: String, endTime: String, days: List<String>): void
+    + getId(): int
+    + setTotalNumberOfWaitingList(i: int): void
+    + getTotalNumberOfWaitingList(): int
+    + setNumberOfWaitingList(dateSchedulePair: DateSchedulePair, i: int): void
+    + getNumberOfWaitingList(dateSchedulePair: DateSchedulePair): int
+    + getAvailableSeatsForWaitingList(dateSchedulePair: DateSchedulePair): int
+    + static showAllBuses(): void
+    + showAvailableNoOfSeats(source: String, destination: String, date: String, time: String): void
+    + getBookedSeats(dateSchedulePair: DateSchedulePair): int
+}
+
+class Schedule_SourceDestinationTimeDaysPair {
+    - source: S
+    - destination: De
+    - startTime: ST
+    - endTime: ET
+    - days: Da
+    + Schedule_SourceDestinationTimeDaysPair(source: S, destination: De, time: ST, endTime: ET, days: Da)
+    + getSource(): S
+    + getDestination(): De
+    + getStartTime(): ST
+    + getEndTime(): ET
+    + getDays(): ArrayList<String>
+}
+
+class DateSchedulePair {
+    - date: Da
+    - schedule: Sc
+    + DateSchedulePair(date: Da, schedule: Sc)
+    + getDate(): String
+    + getSchedule(): Schedule_SourceDestinationTimeDaysPair
+    + hashCode(): int
+    + equals(o: Object): boolean
+}
+class BusDatePair<S, De, D> {
+    -S source
+    -De destination
+    -D date
+    +BusDatePair(S source, De destination, D date)
+    +S getSource()
+    +De getDestination()
+    +D getDate()
+    +int hashCode()
+    +boolean equals(Object o)
+}
+
+
+
+User --|> UserActions
+Admin --|> UserActions
+Admin --> User
+
+User "1" -- "many" Booking
+Booking "many" -- "1" Bus
+Bus "1" -- "many" Schedule_SourceDestinationTimeDaysPair
+Bus "1" -- "many" BusDatePair
+Bus "1" -- "many" DateSchedulePair
+@enduml
