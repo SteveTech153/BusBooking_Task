@@ -1,56 +1,83 @@
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
+
 public class Bus {
     static int defaultSeats = 20;
     static int defaultWaitingList = 5;
+    static int noOfBuses = 0;
     private int id=0;
-    private String source;
-    private String destination;
-    private int availableSeats = 20;
+    private HashMap<DateSchedulePair, Integer> bookedSeats = new HashMap<>();
+    private HashMap<DateSchedulePair, Integer> numberOfWaitingList = new HashMap<>();
     private int totalSeats = 20;
     private int totalNumberOfWaitingList = 5;
-    private int numberOfWaitingList = 0;
-    public Bus(String source, String destination) {
-        this.source = source;
-        this.destination = destination;
-        this.id = ++id;
-    }
-    public Bus(String source, String destination, int noOfSeats, int noOfWaitingList) {
-        this.source = source;
-        this.destination = destination;
-        this.availableSeats = noOfSeats;
+    static HashMap<Integer, List<Schedule_SourceDestinationTimeDaysPair>> allSchedules = new HashMap<>();
+    private List<Schedule_SourceDestinationTimeDaysPair> schedules = new ArrayList<>();
+    static HashMap<Integer, Bus> busIdMap = new HashMap<>();
+    static HashMap<BusDatePair<String,String,String>, HashMap<String, Bus>> srcDstDateBusMap = new HashMap<>();
+    static Scanner sc = new Scanner(System.in);
+
+    public Bus(int noOfSeats, int noOfWaitingList) {
         this.totalSeats = noOfSeats;
         this.totalNumberOfWaitingList = noOfWaitingList;
-        this.id = ++id;
-    }
-    public void showDetails(){
-        System.out.println("Bus ID: " + id);
-        System.out.println("Source: " + source);
-        System.out.println("Destination: " + destination);
-        System.out.println("Available Seats: " + availableSeats);
-        System.out.println("Total Seats: " + totalSeats);
-    }
-    public int getAvailableSeats() {
-        return availableSeats;
+        this.id = ++noOfBuses;
+        busIdMap.put(id, this);
     }
 
-    public void setAvailableSeats(int i) {
-        availableSeats = i;
-    }
-    public boolean isWaitingListAvailable() {
-        return numberOfWaitingList < totalNumberOfWaitingList;
-    }
+    public int getAvailableSeats(DateSchedulePair dateSchedulePair) {
+        return totalSeats - bookedSeats.getOrDefault(dateSchedulePair, 0);
 
+    }
+    public int getTotalAvailableSeats(DateSchedulePair dateSchedulePair) {
+        return totalSeats - bookedSeats.getOrDefault(dateSchedulePair, 0) + totalNumberOfWaitingList - numberOfWaitingList.getOrDefault(dateSchedulePair, 0);
+    }
+    public void setTotalSeats(int i) {
+        totalSeats = i;
+    }
+    public void setBookedSeats(DateSchedulePair dateSchedulePair, int i) {
+        bookedSeats.put(dateSchedulePair, i);
+    }
+    public boolean isWaitingListAvailable(DateSchedulePair dateSchedulePair) {
+        return totalNumberOfWaitingList - numberOfWaitingList.getOrDefault(dateSchedulePair, 0) > 0;
+    }
+    public void showSchedule(){
+        for(int i=0; i<schedules.size(); i++){
+            System.out.println("Source: "+schedules.get(i).getSource()+" Destination: "+schedules.get(i).getDestination()+" Time: "+schedules.get(i).getStartTime()+"-"+schedules.get(i).getEndTime()+" Days: "+schedules.get(i).getDays());
+        }
+    }
+    public Schedule_SourceDestinationTimeDaysPair getSchedule(String startTime, String date){
+        LocalDate localDate = LocalDate.parse(date, java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String day = localDate.getDayOfWeek().toString();
+        for(Schedule_SourceDestinationTimeDaysPair schedule: schedules){
+            if(schedule.getStartTime().equals(startTime) && schedule.getDays().contains(day.toLowerCase())){
+                return schedule;
+            }
+        }
+        return null;
+    }
+    public void addSchedule(String source, String destination, String startTime, String endTime, List<String> days){
+        for(Schedule_SourceDestinationTimeDaysPair schedule: schedules){
+            for(Object day: schedule.getDays()){
+                if(days.contains((String)day)){
+                    if((schedule.getStartTime().compareTo(startTime)<=0 && schedule.getEndTime().compareTo(startTime)>=0) || (schedule.getStartTime().compareTo(endTime)<=0 && schedule.getEndTime().compareTo(endTime)>=0)){
+                        System.out.println("Time slot collides with another schedule. Enter different time slot again: ");
+                        return;
+                    }
+                }
+            }
+        }
+        schedules.add(new Schedule_SourceDestinationTimeDaysPair(source, destination, startTime, endTime, days));
+        if(!allSchedules.containsKey(id)){
+            allSchedules.put(id, schedules);
+        }
+    }
     public int getId() {
         return this.id;
     }
-
-    public String getSource() {
-        return this.source;
-    }
-    public void setSource(String source) {
-        this.source = source;
-    }
-    public String getDestination() {
-        return this.destination;
+    public static Bus getBus(int id) {
+        return busIdMap.get(id);
     }
     public void setTotalNumberOfWaitingList(int i) {
         totalNumberOfWaitingList = i;
@@ -58,25 +85,35 @@ public class Bus {
     public int getTotalNumberOfWaitingList() {
         return totalNumberOfWaitingList;
     }
-    public void setNumberOfWaitingList(int i) {
-        numberOfWaitingList = i;
+    public void setNumberOfWaitingList(DateSchedulePair dateSchedulePair, int i) {
+        numberOfWaitingList.put(dateSchedulePair, i);
     }
 
-    public int getNumberOfWaitingList() {
-        return numberOfWaitingList;
+    public int getNumberOfWaitingList(DateSchedulePair dateSchedulePair) {
+        return numberOfWaitingList.getOrDefault(dateSchedulePair, 0);
     }
-    public int getAvailableSeatsForWaitingList() {
-        return totalNumberOfWaitingList - numberOfWaitingList;
+    public int getAvailableSeatsForWaitingList(DateSchedulePair dateSchedulePair) {
+        return totalNumberOfWaitingList - numberOfWaitingList.getOrDefault(dateSchedulePair, 0);
     }
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Bus that = (Bus) o;
-        return source.equals(that.source) && destination.equals(that.destination);
+    public static void showAllBuses(){
+        System.out.println("Available buses: ");
+        for(int i=0; i<Bus.busIdMap.size(); i++){
+            System.out.print((i+1) + "-> ");
+            Bus.busIdMap.get(i+1).showSchedule();
+        }
     }
 
-    public void setDestination(String destination) {
-        this.destination = destination;
+    public void showAvailableNoOfSeats(String source, String destination, String date, String time){
+        Bus bus = srcDstDateBusMap.get(new BusDatePair<>(source, destination, date)).get(time);
+        if(bus != null) {
+            System.out.println("Available seats : "+bus.getAvailableSeats(new DateSchedulePair(date, time))+". Available waiting list: "+bus.getAvailableSeatsForWaitingList(new DateSchedulePair(date, time))+"\n");
+        } else {
+            System.out.println("Available seats : "+Bus.defaultSeats+". Available waiting list: "+Bus.defaultWaitingList+"\n");
+        }
+        System.out.println("");
+    }
+
+    public int getBookedSeats(DateSchedulePair dateSchedulePair) {
+        return bookedSeats.getOrDefault(dateSchedulePair, 0);
     }
 }
