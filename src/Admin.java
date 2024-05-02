@@ -17,10 +17,6 @@ public class Admin extends User implements UserActions{
         return new Admin(name);
     }
 
-    public String getUserName() {
-        return this.getUserName();
-    }
-
     public void addCity(String city){
         Booking.availableCities.add(city);
     }
@@ -46,6 +42,10 @@ public class Admin extends User implements UserActions{
         for(int i=0; i<Bus.busIdMap.size(); i++){
             System.out.print((i+1) + "-> BusId: "+Bus.busIdMap.get(i+1).getId());
             Bus.busIdMap.get(i+1).showSchedule();
+        }
+        if(Bus.busIdMap.size()==0){
+            System.out.println("No buses available.");
+            return;
         }
         System.out.println("");
         System.out.println("Enter choice: ");

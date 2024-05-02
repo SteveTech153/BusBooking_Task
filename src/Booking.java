@@ -117,6 +117,10 @@ public class Booking {
         for(int i=0;i<availableCities.size();i++) {
             System.out.println((i+1)+" -> "+availableCities.get(i));
         }
+        if(availableCities.size()==0){
+            System.out.println("No cities available.\n");
+            return false;
+        }
         System.out.println("Enter the source city number : ");
         int sourceIndex = sc.nextInt();
         while(sourceIndex<0 || sourceIndex>availableCities.size()){
@@ -246,6 +250,9 @@ public class Booking {
     public static void showAvailableCities() {
         availableCities.forEach(System.out::println);
         System.out.println("");
+        if(availableCities.size()==0){
+            System.out.println("No cities available\n");
+        }
     }
 
     public static void cancelBooking(Integer userId, boolean changeDate) {
