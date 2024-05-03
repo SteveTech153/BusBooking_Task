@@ -37,9 +37,10 @@ public class Main {
 //
 //        booker.showAvailableNoOfSeats("Chennai", "Madurai", "2024-04-29");
     }
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.println("--------Bus Booking System--------\n");
+        System.out.println("Bus Booking System\n");
         String choice = "1";
         while (!choice .equals("0")) {
             System.out.println("1 for Admin");
@@ -53,6 +54,9 @@ public class Main {
                     System.out.println("Enter name: ");
                     String name = sc.next();
                     Admin admin = Admin.findAdmin(name);
+                    if(admin==null){
+                        break;
+                    }
                     String adminChoice = "1";
                     while (!adminChoice.equals("0")) {
                         System.out.println("1 to add city");
@@ -64,7 +68,8 @@ public class Main {
                         System.out.println("7 to modify bus");
                         System.out.println("8 to set the credits for cancellation");
                         System.out.println("9 to show All users");
-                        System.out.println("10 to show credentials and privileges");
+                        System.out.println("10 to show all bookings");
+                        System.out.println("11 to show credentials and privileges");
                         System.out.println("0 to exit");
                         adminChoice = sc.next();
                         switch (adminChoice) {
@@ -73,12 +78,20 @@ public class Main {
                             case "1":
                                 System.out.println("Enter city: ");
                                 String city = sc.next();
-                                admin.addCity(city);
+                                admin.addCity(city.toLowerCase());
                                 break;
                             case "2":
+                                if(Booking.availableCities.size()==0){
+                                    System.out.println("No cities available");
+                                    break;
+                                }
+                                System.out.println("Available cities: ");
+                                for(int i=0; i<Booking.availableCities.size(); i++){
+                                    System.out.println(Booking.availableCities.get(i));
+                                }
                                 System.out.println("Enter city: ");
                                 String city1 = sc.next();
-                                admin.removeCity(city1);
+                                admin.removeCity(city1.toLowerCase());
                                 break;
                             case "3":
                                 admin.createBus();
@@ -87,6 +100,11 @@ public class Main {
                                 admin.assignSourceDestinationTimeToBus();
                                 break;
                             case "5":
+                                if(Bus.noOfBuses==0)
+                                {
+                                    System.out.println("No buses to delete");
+                                    break;
+                                }
                                 Bus.showAllBuses();
                                 System.out.println("enter bus id to delete: ");
                                 int busId = sc.nextInt();
@@ -96,6 +114,10 @@ public class Main {
                                 Bus.showAllBuses();
                                 break;
                             case "7":
+                                if(Bus.noOfBuses==0){
+                                    System.out.println("No buses to modify");
+                                    break;
+                                }
                                 Bus.showAllBuses();
                                 System.out.println("Enter bus id to modify: ");
                                 int busId1 = sc.nextInt();
@@ -125,6 +147,9 @@ public class Main {
                                 admin.showAllUsers();
                                 break;
                             case "10":
+                                admin.showAllBookings();
+                                break;
+                            case "11":
                                 admin.showCredentialsAndPrivileges();
                                 break;
                             default:

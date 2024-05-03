@@ -13,10 +13,10 @@ public class Bus {
     private HashMap<DateSchedulePair, Integer> numberOfWaitingList = new HashMap<>();
     private int totalSeats = 20;
     private int totalNumberOfWaitingList = 5;
-    static HashMap<Integer, List<Schedule_SourceDestinationTimeDaysPair>> allSchedules = new HashMap<>();
+    static HashMap<Integer, List<Schedule_SourceDestinationTimeDaysPair>> allSchedulesBusIdMap = new HashMap<>();
+    static List<Schedule_SourceDestinationTimeDaysPair> allSchedules = new ArrayList<>();
     private List<Schedule_SourceDestinationTimeDaysPair> schedules = new ArrayList<>();
     static HashMap<Integer, Bus> busIdMap = new HashMap<>();
-    static HashMap<BusDatePair<String,String,String>, HashMap<String, Bus>> srcDstDateBusMap = new HashMap<>();
     static Scanner sc = new Scanner(System.in);
 
     public Bus(int noOfSeats, int noOfWaitingList) {
@@ -62,16 +62,17 @@ public class Bus {
             for(Object day: schedule.getDays()){
                 if(days.contains((String)day)){
                     if((schedule.getStartTime().compareTo(startTime)<=0 && schedule.getEndTime().compareTo(startTime)>=0) || (schedule.getStartTime().compareTo(endTime)<=0 && schedule.getEndTime().compareTo(endTime)>=0)){
-                        System.out.println("Time slot collides with another schedule. Enter different time slot again: ");
+                        System.out.println("Time slot collides with another schedule. Cannot add schedule.");
                         return;
                     }
                 }
             }
         }
         schedules.add(new Schedule_SourceDestinationTimeDaysPair(source, destination, startTime, endTime, days));
-        if(!allSchedules.containsKey(id)){
-            allSchedules.put(id, schedules);
+        if(!allSchedulesBusIdMap.containsKey(id)){
+            allSchedulesBusIdMap.put(id, schedules);
         }
+        allSchedules.add(new Schedule_SourceDestinationTimeDaysPair(source, destination, startTime, endTime, days));
     }
     public int getId() {
         return this.id;
@@ -96,23 +97,17 @@ public class Bus {
         return totalNumberOfWaitingList - numberOfWaitingList.getOrDefault(dateSchedulePair, 0);
     }
     public static void showAllBuses(){
+        if(Bus.busIdMap.size()==0){
+            System.out.println("No buses available.");
+            return;
+        }
         System.out.println("Available buses: ");
         for(int i=0; i<Bus.busIdMap.size(); i++){
             System.out.print((i+1) + "-> ");
             Bus.busIdMap.get(i+1).showSchedule();
         }
-    }
-
-    public void showAvailableNoOfSeats(String source, String destination, String date, String time){
-        Bus bus = srcDstDateBusMap.get(new BusDatePair<>(source, destination, date)).get(time);
-        if(bus != null) {
-            System.out.println("Available seats : "+bus.getAvailableSeats(new DateSchedulePair(date, time))+". Available waiting list: "+bus.getAvailableSeatsForWaitingList(new DateSchedulePair(date, time))+"\n");
-        } else {
-            System.out.println("Available seats : "+Bus.defaultSeats+". Available waiting list: "+Bus.defaultWaitingList+"\n");
-        }
         System.out.println("");
     }
-
     public int getBookedSeats(DateSchedulePair dateSchedulePair) {
         return bookedSeats.getOrDefault(dateSchedulePair, 0);
     }

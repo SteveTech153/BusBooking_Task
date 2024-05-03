@@ -11,18 +11,30 @@ public class Admin extends User implements UserActions{
     public static Admin findAdmin(String name) {
         for(User user: User.users.values()) {
             if(user.getUserName().equals(name)) {
-                return (Admin) user;
+                if(user instanceof Admin)
+                    return (Admin) user;
+                else {
+                    System.out.println("User is not an admin");
+                    return null;
+                }
             }
         }
         return new Admin(name);
     }
 
     public void addCity(String city){
+        if(Booking.availableCities.contains(city)){
+            System.out.println("City already exists");
+            return;
+        }
         Booking.availableCities.add(city);
     }
 
     public void removeCity(String city){
-        Booking.availableCities.remove(city);
+        if(Booking.availableCities.contains(city))
+            Booking.availableCities.remove(city);
+        else
+            System.out.println("City not found");
     }
 
     public void setCities(List<String> cities){
@@ -30,17 +42,21 @@ public class Admin extends User implements UserActions{
     }
     public void showAllUsers(){
         for(User user: User.users.values()){
-            System.out.println("User: "+user.getUserName()+" Id: "+user.getId());
+            if(user instanceof Admin)
+                System.out.println("Admin: "+user.getUserName()+" Id: "+user.getId());
+            else
+                System.out.println("User: "+user.getUserName()+" Id: "+user.getId());
         }
         if(User.users.size()==0){
             System.out.println("No users created yet");
         }
+        System.out.println("");
     }
 
     public void assignSourceDestinationTimeToBus(){
         System.out.println("Available buses: ");
         for(int i=0; i<Bus.busIdMap.size(); i++){
-            System.out.print((i+1) + "-> BusId: "+Bus.busIdMap.get(i+1).getId());
+            System.out.print((i+1) + "-> BusId: "+Bus.busIdMap.get(i+1).getId()+" ");
             Bus.busIdMap.get(i+1).showSchedule();
         }
         if(Bus.busIdMap.size()==0){
@@ -83,7 +99,7 @@ public class Admin extends User implements UserActions{
         }
         System.out.println("Enter ending time(HH:MM): ");
         String endTime = sc.next();
-        while(!endTime.matches("([01]?[0-9]|2[0-3]):[0-5][0-9]")){
+        while(!endTime.matches("([01]?[0-9]|2[0-3]):[0-5][0-9]") || startTime.compareTo(endTime)>=0){
             System.out.println("Invalid time slot. Enter again: ");
             endTime = sc.next();
         }
@@ -109,13 +125,15 @@ public class Admin extends User implements UserActions{
         for (int i = 0; i < cnt; i++) {
             System.out.println("Enter day " + (i + 1) + ": ");
             String day = sc.next();
-            while (!day.matches("Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday")) {
+            day = day.toLowerCase();
+            while (!day.matches("monday|tuesday|wednesday|thursday|friday|saturday|sunday")) {
                 System.out.println("Invalid day.(Type Monday or Tuesday or Wednesday or Thursday or Friday or Saturday or Sunday) Enter again: ");
                 day = sc.next();
                 day = day.toLowerCase();
             }
             days.add(day);
         }
+
         Bus.busIdMap.get(busId).addSchedule(source, destination, startTime, endTime, days);
 
     }
@@ -178,4 +196,13 @@ public class Admin extends User implements UserActions{
         System.out.println("9. Can See All users");
         System.out.println("");
     }
+    public void showAllBookings(){
+        for(Booking booking: Booking.bookings){
+            booking.showBooking();
+        }
+        if(Booking.bookings.size()==0){
+            System.out.println("No bookings");
+        }
+    }
 }
+

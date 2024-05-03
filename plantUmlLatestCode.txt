@@ -128,17 +128,7 @@ class DateSchedulePair {
     + hashCode(): int
     + equals(o: Object): boolean
 }
-class BusDatePair<S, De, D> {
-    -S source
-    -De destination
-    -D date
-    +BusDatePair(S source, De destination, D date)
-    +S getSource()
-    +De getDestination()
-    +D getDate()
-    +int hashCode()
-    +boolean equals(Object o)
-}
+
 
 
 
@@ -149,6 +139,5 @@ Admin --> User
 User "1" -- "many" Booking
 Booking "many" -- "1" Bus
 Bus "1" -- "many" Schedule_SourceDestinationTimeDaysPair
-Bus "1" -- "many" BusDatePair
 Bus "1" -- "many" DateSchedulePair
 @enduml

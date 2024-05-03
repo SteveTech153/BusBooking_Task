@@ -20,7 +20,7 @@ public class Booking {
     static List<Booking> bookings = new ArrayList<>();
     static HashMap<Integer, Booking> bookingMap = new HashMap<>();
     static List<Booking> waitingList = new ArrayList<>();
-    static HashMap<BusDatePair<String,String,String>, Bus> bookedMap = new HashMap<>();
+    //static HashMap<BusDatePair<String,String,String>, Bus> bookedMap = new HashMap<>();
     static int creditForCancellationOnSameDay = 50;
     static int creditForCancellationBefore = 80;
     static Scanner sc = new Scanner(System.in);
@@ -43,6 +43,8 @@ public class Booking {
         System.out.println("User: " + User.getUser(userId).getUserName());
         System.out.println("no Of Confirmed Seats: " + noOfConfirmedSeats);
         System.out.println("no Of Waiting List Seats: " + noOfWaitingListSeats);
+        System.out.println("Source: " + source);
+        System.out.println("Destination: " + destination);
         System.out.println("Bus: " + busId);
         System.out.println("Date: " + date);
         System.out.println("");
@@ -154,9 +156,9 @@ public class Booking {
         }
 
         String day = LocalDate.parse(date).getDayOfWeek().toString();
-        HashMap<Integer, List<Schedule_SourceDestinationTimeDaysPair>> allSchedules = Bus.allSchedules;
+        HashMap<Integer, List<Schedule_SourceDestinationTimeDaysPair>> allSchedulesBusIdMap = Bus.allSchedulesBusIdMap;
         HashMap<Integer, Schedule_SourceDestinationTimeDaysPair> matchedSchedules = new HashMap<>();
-        for(Map.Entry<Integer, List<Schedule_SourceDestinationTimeDaysPair>> entry: allSchedules.entrySet()){
+        for(Map.Entry<Integer, List<Schedule_SourceDestinationTimeDaysPair>> entry: allSchedulesBusIdMap.entrySet()){
             for(Schedule_SourceDestinationTimeDaysPair schedule: entry.getValue()){
                 if(schedule.getSource().equals(source) && schedule.getDestination().equals(destination) && schedule.getDays().contains(day.toLowerCase())){
                     matchedSchedules.put(entry.getKey(), schedule);
@@ -200,7 +202,7 @@ public class Booking {
             Booking booking = new Booking(userId, busId, date, noOfSeats, 0, source, destination, startTime, schedule.getEndTime());
             bookings.add(booking);
             bus.setBookedSeats(dateSchedulePair, bus.getBookedSeats(dateSchedulePair)+noOfSeats);
-            bookedMap.put(new BusDatePair<String,String,String>(source, destination, date), bus);
+           // bookedMap.put(new BusDatePair<String,String,String>(source, destination, date), bus);
             User user = User.getUser(userId);
             user.addBooking(booking);
             if(user.getCredit()>=noOfSeats*100) {
@@ -226,7 +228,7 @@ public class Booking {
             waitingList.add(booking);
             bus.setBookedSeats(dateSchedulePair, bus.getBookedSeats(dateSchedulePair)+bus.getAvailableSeats(dateSchedulePair));
             bus.setNumberOfWaitingList(dateSchedulePair,bus.getNumberOfWaitingList(dateSchedulePair)+remainingSeats);
-            bookedMap.put(new BusDatePair<String,String,String>(source, destination, date), bus);
+            //bookedMap.put(new BusDatePair<String,String,String>(source, destination, date), bus);
             User user = User.getUser(userId);
             user.addBooking(booking);
             if(user.getCredit()>=noOfSeats*100) {
@@ -326,7 +328,8 @@ public class Booking {
             DateSchedulePair dateSchedulePair = new DateSchedulePair<>(booking.date, schedule);
             bus.setBookedSeats(dateSchedulePair, bus.getBookedSeats(dateSchedulePair)-remainingSeats);
             bus.setNumberOfWaitingList(dateSchedulePair, bus.getNumberOfWaitingList(dateSchedulePair)-remainingSeats);
-            System.out.println("Booking cancelled successfully");
+            if(!changeDate)
+                System.out.println("Booking cancelled successfully");
             if(booking.date.compareTo(LocalDate.now().toString())==0){
                 user.addCredit(creditForCancellationOnSameDay*numberOfSeatsToCancel);
                 if(!changeDate)
