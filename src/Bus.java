@@ -1,8 +1,5 @@
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Bus {
     static int defaultSeats = 20;
@@ -61,19 +58,46 @@ public class Bus {
         for(Schedule_SourceDestinationTimeDaysPair schedule: schedules){
             for(Object day: schedule.getDays()){
                 if(days.contains((String)day)){
-                    if((schedule.getStartTime().compareTo(startTime)<=0 && schedule.getEndTime().compareTo(startTime)>=0) || (schedule.getStartTime().compareTo(endTime)<=0 && schedule.getEndTime().compareTo(endTime)>=0)){
-                        System.out.println("Time slot collides with another schedule. Cannot add schedule.");
-                        return;
+                    if(schedule.getStartTime().compareTo(schedule.getEndTime())<0) {
+                        if ((schedule.getStartTime().compareTo(startTime) <= 0 && schedule.getEndTime().compareTo(startTime) > 0) || (schedule.getStartTime().compareTo(endTime) < 0 && schedule.getEndTime().compareTo(endTime) > 0)) {
+                            System.out.println("Time slot collides with another schedule. Cannot add schedule.");
+                            return;
+                        }
+                    }else{
+                        String tmpEndTime = Integer.parseInt(schedule.getEndTime().split(":")[0])+24 + ":" + schedule.getEndTime().split(":")[1];
+                        if( (schedule.getStartTime().compareTo(startTime)<=0 && tmpEndTime.compareTo(startTime)>0) || (schedule.getStartTime().compareTo(endTime)<0 && tmpEndTime.compareTo(endTime)>0) || (schedule.getEndTime().compareTo(startTime) > 0)){
+                            System.out.println("Time slot collides with another schedule. Cannot add schedule.");
+                            return;
+                        }
                     }
                 }
             }
         }
+        List<String> daysList = new ArrayList<>(Arrays.asList("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"));
+        List<String> prevDays = new ArrayList<>();
+        for(String day: days){
+            int prevIndex = daysList.indexOf(day)-1;
+            if(prevIndex==-1){
+                prevIndex = 6;
+            }
+            prevDays.add(daysList.get(prevIndex));
+        }
+        for(Schedule_SourceDestinationTimeDaysPair schedule: schedules){
+            for(String prevDay: prevDays){
+                if(schedule.getDays().contains(prevDay) && schedule.getStartTime().compareTo(schedule.getEndTime())>0 && schedule.getEndTime().compareTo(startTime)>0){
+                    System.out.println("Time slot collides with another schedule. Cannot add schedule.");
+                    return;
+                }
+            }
+        }
+
         schedules.add(new Schedule_SourceDestinationTimeDaysPair(source, destination, startTime, endTime, days));
         if(!allSchedulesBusIdMap.containsKey(id)){
             allSchedulesBusIdMap.put(id, schedules);
         }
         allSchedules.add(new Schedule_SourceDestinationTimeDaysPair(source, destination, startTime, endTime, days));
     }
+
     public int getId() {
         return this.id;
     }

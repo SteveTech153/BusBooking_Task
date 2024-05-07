@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Admin extends User implements UserActions{
     static Scanner sc = new Scanner(System.in);
@@ -99,7 +96,7 @@ public class Admin extends User implements UserActions{
         }
         System.out.println("Enter ending time(HH:MM): ");
         String endTime = sc.next();
-        while(!endTime.matches("([01]?[0-9]|2[0-3]):[0-5][0-9]") || startTime.compareTo(endTime)>=0){
+        while(!endTime.matches("([01]?[0-9]|2[0-3]):[0-5][0-9]") ){
             System.out.println("Invalid time slot. Enter again: ");
             endTime = sc.next();
         }
@@ -112,13 +109,7 @@ public class Admin extends User implements UserActions{
         }
         List<String> days = new ArrayList<>();
         if(cnt==7){
-            days.add("monday");
-            days.add("tuesday");
-            days.add("wednesday");
-            days.add("thursday");
-            days.add("friday");
-            days.add("saturday");
-            days.add("sunday");
+            days.addAll(new ArrayList<>(Arrays.asList("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")));
             Bus.busIdMap.get(busId).addSchedule(source, destination, startTime, endTime, days);
             return;
         }

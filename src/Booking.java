@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -57,8 +58,6 @@ public class Booking {
     public String toString() {
         return "Booking ID: " + id + "\n" +
                 "User: " + User.getUser(userId).getUserName() + "\n" +
-                //"Source: " + Bus.getBus(busId).getSource() + "\n" +
-                //"Destination: " + Bus.getBus(busId).getDestination() + "\n" +
                 "Bus: " + busId + "\n" +
                 "Date: " + date + "\n";
     }
@@ -160,7 +159,7 @@ public class Booking {
         HashMap<Integer, Schedule_SourceDestinationTimeDaysPair> matchedSchedules = new HashMap<>();
         for(Map.Entry<Integer, List<Schedule_SourceDestinationTimeDaysPair>> entry: allSchedulesBusIdMap.entrySet()){
             for(Schedule_SourceDestinationTimeDaysPair schedule: entry.getValue()){
-                if(schedule.getSource().equals(source) && schedule.getDestination().equals(destination) && schedule.getDays().contains(day.toLowerCase())){
+                if(schedule.getSource().equals(source) && schedule.getDestination().equals(destination) && schedule.getDays().contains(day.toLowerCase()) && (date.compareTo(LocalDate.now().toString())>0 || (date.compareTo(LocalDate.now().toString())==0 && schedule.getStartTime().compareTo(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")))>0))){
                     matchedSchedules.put(entry.getKey(), schedule);
                     System.out.println("BusId: "+entry.getKey()+" Source: "+source+" Destination: "+destination+" Time: "+schedule.getStartTime()+"-"+schedule.getEndTime()+" Days: "+schedule.getDays()+ "seats available: "+Bus.getBus(entry.getKey()).getAvailableSeats(new DateSchedulePair<>(date, schedule)));
                 }
